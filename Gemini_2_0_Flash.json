@@ -1,271 +1,375 @@
 {
-    "name": "Gemini 2.0 Flash",
-    "nodes": [
-      {
-        "parameters": {
-          "pollTimes": {
-            "item": [
-              {
-                "mode": "everyMinute"
-              }
-            ]
-          },
-          "documentId": {
-            "__rl": true,
-            "value": "1LQWi3wMRUYavC0KsNx75OfCQBqHk3VGAzeIfSDp6k34",
-            "mode": "list",
-            "cachedResultName": "Financial Transactions Dataset",
-            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LQWi3wMRUYavC0KsNx75OfCQBqHk3VGAzeIfSDp6k34/edit?usp=drivesdk"
-          },
-          "sheetName": {
-            "__rl": true,
-            "value": "gid=0",
-            "mode": "list",
-            "cachedResultName": "Sheet1",
-            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LQWi3wMRUYavC0KsNx75OfCQBqHk3VGAzeIfSDp6k34/edit#gid=0"
-          },
-          "options": {}
+  "name": "Gemini 2.0 Flash",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
         },
-        "type": "n8n-nodes-base.googleSheetsTrigger",
-        "typeVersion": 1,
-        "position": [
-          -380,
-          -140
-        ],
-        "id": "9e1bd19a-386f-4867-8e1f-6fe1b2d4f33b",
-        "name": "Google Sheets Trigger",
-        "credentials": {
-          "googleSheetsTriggerOAuth2Api": {
-            "id": "q77h9twlrgiFEjnf",
-            "name": "Google Sheets Trigger account"
-          }
-        }
+        "documentId": {
+          "__rl": true,
+          "value": "1LQWi3wMRUYavC0KsNx75OfCQBqHk3VGAzeIfSDp6k34",
+          "mode": "list",
+          "cachedResultName": "Financial Transactions Dataset",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LQWi3wMRUYavC0KsNx75OfCQBqHk3VGAzeIfSDp6k34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LQWi3wMRUYavC0KsNx75OfCQBqHk3VGAzeIfSDp6k34/edit#gid=0"
+        },
+        "options": {}
       },
-      {
-        "parameters": {
-          "modelName": "models/gemini-2.0-flash-thinking-exp-1219",
-          "options": {}
-        },
-        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-        "typeVersion": 1,
-        "position": [
-          0,
-          100
-        ],
-        "id": "03bf1ed2-36fd-47a9-856c-faa307d656d3",
-        "name": "Google Gemini Chat Model",
-        "credentials": {
-          "googlePalmApi": {
-            "id": "rARt8SurIJQtYN2Q",
-            "name": "Google Gemini(PaLM) Api account"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "jsonSchemaExample": "{\n  \"subject\": \"Latest Transaction\", \n  \"body\": \"Transaction Details\"\n}"
-        },
-        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-        "typeVersion": 1.2,
-        "position": [
-          500,
-          300
-        ],
-        "id": "08f8bd6c-5c74-4f7d-88bc-138d334ed3c0",
-        "name": "Structured Output Parser"
-      },
-      {
-        "parameters": {
-          "hasOutputParser": true,
-          "messages": {
-            "messageValues": [
-              {
-                "message": "=You are in charge of client's financial transactions. You must take the information and create a summary to be emailed to the Analytics team. The email must be signed from \"Financial Analysis Team\". Show the transaction details in list for visibility.\n\nHere is the information:  \n\nClient Id: {{ $json.chatInput.client_id }}\nCard Number: {{ $json.chatInput.card_number }}\nCredit Limit: {{ $json.chatInput.expires }}\nCard on Darkweb: {{ $json.chatInput.card_on_dark_web }}\n\nPlease output below parameters: \nEmail Subject \nEmail body"
-              }
-            ]
-          }
-        },
-        "type": "@n8n/n8n-nodes-langchain.chainLlm",
-        "typeVersion": 1.6,
-        "position": [
-          100,
-          -140
-        ],
-        "id": "5fe1e01b-795d-4406-9c21-c0db1e3805fc",
-        "name": "Basic LLM Chain"
-      },
-      {
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "id": "58393e84-6905-49c5-a202-c65c60e4662a",
-                "name": "chatInput",
-                "value": "={ \n  \"client_id\": {{ $json.client_id }},\n  \"card_number\": {{ $json.card_number }},\n  \"expires\": {{ $json.expires }},\n  \"card_on_dark_web\": {{ $json.card_on_dark_web }}\n}",
-                "type": "object"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "id": "22409c29-64da-4fe5-a35d-e69a305e68dd",
-        "name": "Prompt",
-        "type": "n8n-nodes-base.set",
-        "position": [
-          -140,
-          -140
-        ],
-        "typeVersion": 3.4
-      },
-      {
-        "parameters": {
-          "options": {
-            "prompt": "Instructions:\n--------------\n{instructions}\n--------------\nCompletion:\n--------------\n{completion}\n--------------\n\nAbove, the Completion did not satisfy the constraints given in the Instructions.\nError:\n--------------\n{error}\n--------------\n\nPlease try again. Please only respond with an answer that satisfies the constraints laid out in the Instructions:"
-          }
-        },
-        "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
-        "typeVersion": 1,
-        "position": [
-          320,
-          100
-        ],
-        "id": "02748d2a-f0cc-461f-97ef-e1b98963208c",
-        "name": "Auto-fixing Output Parser"
-      },
-      {
-        "parameters": {
-          "modelName": "models/gemini-2.0-flash-thinking-exp-1219",
-          "options": {}
-        },
-        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-        "typeVersion": 1,
-        "position": [
-          220,
-          300
-        ],
-        "id": "4e241586-bad5-4e0e-b618-41349f89c44d",
-        "name": "Google Gemini Chat Model1",
-        "credentials": {
-          "googlePalmApi": {
-            "id": "rARt8SurIJQtYN2Q",
-            "name": "Google Gemini(PaLM) Api account"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "sendTo": "danialmirxa96@gmail.com",
-          "subject": "={{ $json.output.subject }}",
-          "emailType": "text",
-          "message": "={{ $json.output.body }}",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.gmail",
-        "typeVersion": 2.1,
-        "position": [
-          520,
-          -140
-        ],
-        "id": "57b5b248-5439-4688-ab05-7ee8bb713a65",
-        "name": "Gmail",
-        "webhookId": "cfb86732-4c5b-4d2d-b407-93809c95cf27",
-        "credentials": {
-          "gmailOAuth2": {
-            "id": "A73u6bDBM5nV5oVp",
-            "name": "Gmail account"
-          }
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -140
+      ],
+      "id": "9e1bd19a-386f-4867-8e1f-6fe1b2d4f33b",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "q77h9twlrgiFEjnf",
+          "name": "Google Sheets Trigger account"
         }
       }
-    ],
-    "pinData": {},
-    "connections": {
-      "Google Sheets Trigger": {
-        "main": [
-          [
-            {
-              "node": "Prompt",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-thinking-exp-1219",
+        "options": {}
       },
-      "Google Gemini Chat Model": {
-        "ai_languageModel": [
-          [
-            {
-              "node": "Basic LLM Chain",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Prompt": {
-        "main": [
-          [
-            {
-              "node": "Basic LLM Chain",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Auto-fixing Output Parser": {
-        "ai_outputParser": [
-          [
-            {
-              "node": "Basic LLM Chain",
-              "type": "ai_outputParser",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Google Gemini Chat Model1": {
-        "ai_languageModel": [
-          [
-            {
-              "node": "Auto-fixing Output Parser",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Structured Output Parser": {
-        "ai_outputParser": [
-          [
-            {
-              "node": "Auto-fixing Output Parser",
-              "type": "ai_outputParser",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Basic LLM Chain": {
-        "main": [
-          [
-            {
-              "node": "Gmail",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        100
+      ],
+      "id": "03bf1ed2-36fd-47a9-856c-faa307d656d3",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "rARt8SurIJQtYN2Q",
+          "name": "Google Gemini(PaLM) Api account"
+        }
       }
     },
-    "active": true,
-    "settings": {
-      "executionOrder": "v1"
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"subject\": \"Latest Transaction\", \n  \"body\": \"Transaction Details\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        520
+      ],
+      "id": "08f8bd6c-5c74-4f7d-88bc-138d334ed3c0",
+      "name": "Structured Output Parser"
     },
-    "versionId": "e4b1a651-039b-45c1-8b94-799fac7daf27",
-    "meta": {
-      "templateCredsSetupCompleted": true,
-      "instanceId": "96f721912228b5bb4568c97a1f4e4cc46ab62c108ff367e3039fb855cba37add"
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are in charge of client's financial transactions. You must take the information and create a summary to be emailed to the Analytics team. The email must be signed from \"Financial Analysis Team\". Show the transaction details in list for visibility.\n\nHere is the information:  \n\nClient Id: {{ $json.chatInput.client_id }}\nCard Number: {{ $json.chatInput.card_number }}\nCredit Limit: {{ $json.chatInput.expires }}\nCard on Darkweb: {{ $json.chatInput.card_on_dark_web }}\n\nPlease output below parameters: \nEmail Subject \nEmail body"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        100,
+        -140
+      ],
+      "id": "5fe1e01b-795d-4406-9c21-c0db1e3805fc",
+      "name": "Basic LLM Chain"
     },
-    "id": "EsQAnPLqUFVWkmOe",
-    "tags": []
-  }
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58393e84-6905-49c5-a202-c65c60e4662a",
+              "name": "chatInput",
+              "value": "={ \n  \"client_id\": {{ $json.client_id }},\n  \"card_number\": {{ $json.card_number }},\n  \"expires\": {{ $json.expires }},\n  \"card_on_dark_web\": {{ $json.card_on_dark_web }}\n}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "22409c29-64da-4fe5-a35d-e69a305e68dd",
+      "name": "Prompt",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -140,
+        -140
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "options": {
+          "prompt": "Instructions:\n--------------\n{instructions}\n--------------\nCompletion:\n--------------\n{completion}\n--------------\n\nAbove, the Completion did not satisfy the constraints given in the Instructions.\nError:\n--------------\n{error}\n--------------\n\nPlease try again. Please only respond with an answer that satisfies the constraints laid out in the Instructions:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
+      "typeVersion": 1,
+      "position": [
+        300,
+        240
+      ],
+      "id": "02748d2a-f0cc-461f-97ef-e1b98963208c",
+      "name": "Auto-fixing Output Parser"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-thinking-exp-1219",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        500
+      ],
+      "id": "4e241586-bad5-4e0e-b618-41349f89c44d",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "rARt8SurIJQtYN2Q",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "chai.kahchun@hotmail.com",
+        "subject": "={{ $json.output.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        600,
+        -140
+      ],
+      "id": "57b5b248-5439-4688-ab05-7ee8bb713a65",
+      "name": "Gmail",
+      "webhookId": "cfb86732-4c5b-4d2d-b407-93809c95cf27",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "A73u6bDBM5nV5oVp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Google Sheets Trigger \n### Triggered when any changes is inserted, only extracts the changes",
+        "height": 340,
+        "width": 220
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -440,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "4fec18f6-8b36-4e03-b9f1-06902c359670",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Prompt \n### Stores the JSON result into a single object `chatInput`",
+        "height": 340
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -200,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "91daefea-bde1-47e8-afcd-786b5fff7867",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Structured Output\n### Provides JSON shape example to be applied by output parser. We want the output to have `subject` and `body`. Example:\n\n```\n{\n  \"subject\": \"Latest Transaction\", \n  \"body\": \"Transaction Details\"\n}\n```",
+        "height": 400,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        260
+      ],
+      "typeVersion": 1,
+      "id": "5d5de850-5c6f-494b-9887-58d2b0ba6381",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Auto-Fixing Output Parser\n### Applies the shape provided by the Structured Output to the LLM response",
+        "height": 300,
+        "width": 280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        300,
+        60
+      ],
+      "typeVersion": 1,
+      "id": "8a20e710-1335-40e8-9641-246753d20e80",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Basic LLM Chain\n### 1. Takes the latest changes in the Google Sheet\n### 2. Summarizes it.\n### 3. Write the summary in email format; `subject` and `body`",
+        "height": 340,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        60,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "b2df8623-5486-4076-84aa-acefcc23952c",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Gmail\n### Sends the subject and body as email generated from the LLM Chain",
+        "height": 340,
+        "width": 260
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        500,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "097ce715-a8ec-4976-a609-33c47eb478fa",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# Summarizes Google Sheets Changes and Sending the Summary to Email\n## 1. Extracts any changes in the Google Sheet. The Sheet is [Financial Transaction](https://www.kaggle.com/datasets/computingvictor/transactions-fraud-datasets). So, any changes are usually a new transaction inserted as new row. \n## 2. Summarizes the new transactions into easier to read words.\n## 3. Output parser shapes the LLM response into email format. ## 4. Write the email with format; `subject` and `body`.\n## 5. Email the summary.",
+        "height": 520,
+        "width": 540
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1060,
+        -500
+      ],
+      "typeVersion": 1,
+      "id": "5f4e5f37-0fec-446a-a4cf-b03839862245",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-fixing Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Auto-fixing Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Auto-fixing Output Parser",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dcd8680a-2134-4b1a-a260-69fec2abd21a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "96f721912228b5bb4568c97a1f4e4cc46ab62c108ff367e3039fb855cba37add"
+  },
+  "id": "EsQAnPLqUFVWkmOe",
+  "tags": []
+}
